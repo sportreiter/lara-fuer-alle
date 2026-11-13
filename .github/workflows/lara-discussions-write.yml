@@ -1,0 +1,24 @@
+name: Lara Discussions Bridge (approved writes)
+on:
+  issues:
+    types: [opened]
+permissions:
+  contents: read
+  discussions: write
+  issues: write
+jobs:
+  discussion-write:
+    if: github.repository == 'sportreiter/lara-fuer-alle' && github.event.issue.user.login == 'sportreiter' && startsWith(github.event.issue.title, '[LaraWrite]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Checkout audited code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Process explicitly authorized discussion change
+        env:
+          LARA_REPO: ${{ github.repository }}
+          LARA_EVENT_PATH: ${{ github.event_path }}
+          LARA_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 .github/scripts/write_discussions.py
